@@ -32,7 +32,7 @@ module.exports = async (req, res, next) => {
     console.error(error);
     res
       .status(403)
-      .json({ errorMessage: "전달된 쿠기에서 오류가 발생하였습니다." });
+      .json({ errorMessage: "전달된 쿠키에서 오류가 발생하였습니다." });
     return;
   }
 };
