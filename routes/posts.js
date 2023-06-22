@@ -2,12 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const Posts = require("../schemas/post");
+const Users = require("../schemas/user");
 const authMiddleware = require("../middlewares/auth-middleware");
 
 //게시글 작성 API
 router.post("/posts", authMiddleware, async (req, res) => {
   const { title, content } = req.body;
   const { userId } = res.locals.user;
+
+  const user = await Users.findOne({ _id: userId });
+
   if (!title || !content) {
     return res.status(412).json({
       errorMessage: "데이터 형식이 올바르지 않습니다.",
@@ -25,6 +29,7 @@ router.post("/posts", authMiddleware, async (req, res) => {
   try {
     await Posts.create({
       userId,
+      nickname: user.nickname,
       title,
       content,
     });
@@ -66,8 +71,12 @@ router.get("/posts/:postId", async (req, res) => {
   const { postId } = req.params;
 
   try {
-    const post = await Posts.findOne({ _id: postId });
-
+    const post = await Posts.find({ _id: postId });
+    if (!post) {
+      return res
+        .status(404)
+        .json({ errorMessage: "게시글 조회에 실패하였습니다." });
+    }
     const result = post.map((item) => {
       return {
         postId: item._id,
@@ -95,7 +104,7 @@ router.put("/posts/:postId", authMiddleware, async (req, res) => {
   const { userId } = res.locals.user;
 
   try {
-    const post = await Posts.findOne({ _id: postId });
+    const post = await Posts.find({ _id: postId });
 
     if (!post) {
       return res.status(404).json({
@@ -143,7 +152,7 @@ router.delete("/posts/:postId", authMiddleware, async (req, res) => {
   const { userId } = res.locals.user;
 
   try {
-    const post = await Posts.findOne({ _id: postId });
+    const post = await Posts.find({ _id: postId });
 
     if (!post) {
       return res
