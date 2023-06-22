@@ -14,7 +14,7 @@ router.post("/posts/:postId/comments", authMiddleware, async (req, res) => {
 
   try {
     const post = await Posts.findOne({ _id: postId });
-    const user = await Users.find({ _id: userId });
+    const user = await Users.findOne({ _id: userId });
 
     if (!post) {
       return res.status(404).json({
@@ -30,7 +30,7 @@ router.post("/posts/:postId/comments", authMiddleware, async (req, res) => {
       userId,
       postId,
       comment,
-      nickname: user[0].nickname,
+      nickname: user.nickname,
     });
 
     res.status(201).json({ message: "댓글을 작성하였습니다." });
@@ -90,6 +90,10 @@ router.put(
         return res.status(404).json({
           errorMessage: "게시글이 존재하지 않습니다.",
         });
+      } else if (!comments) {
+        return res.status(404).json({
+          errorMessage: "댓글이 존재하지 않습니다.",
+        });
       } else if (userId !== comments.userId) {
         return res.status(403).json({
           errorMessage: "댓글 수정 권한이 존재하지 않습니다.",
@@ -97,10 +101,6 @@ router.put(
       } else if (!comment) {
         return res.status(412).json({
           errorMessage: "댓글 내용을 입력해주세요.",
-        });
-      } else if (!comments) {
-        return res.status(404).json({
-          errorMessage: "댓글이 존재하지 않습니다.",
         });
       }
 
